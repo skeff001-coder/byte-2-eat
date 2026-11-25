@@ -171,7 +171,7 @@ function TermsOfService() {
       </Section>
 
       <Section title="4. Free Trial">
-        <p>New users receive <strong>one free fridge scan</strong> upon creating an account. The free scan is tied to your registered email address and can only be used once. After the free scan is used, scan packs must be purchased to continue scanning.</p>
+        <p>New users receive <strong>three free fridge scans</strong> upon creating an account. The free scans are tied to your registered email address and can only be claimed once. After the free scans are used, scan packs must be purchased to continue scanning.</p>
       </Section>
 
       <Section title="5. Health Disclaimer — Important">

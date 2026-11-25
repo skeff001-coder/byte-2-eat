@@ -68,7 +68,7 @@ export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) 
           </div>
           {variant === "post-trial" ? (
             <>
-              <h2 className="text-xl font-extrabold tracking-tight">That's your free scan used!</h2>
+              <h2 className="text-xl font-extrabold tracking-tight">You've used your free scans!</h2>
               <p className="mt-1 text-sm opacity-90 max-w-xs">
                 You just saw how fast it works. Keep it going for less than the price of one takeaway.
               </p>

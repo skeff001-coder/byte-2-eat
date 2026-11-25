@@ -23,7 +23,7 @@ function SupportPage() {
         <p className="text-sm text-muted-foreground mt-1">Tap the <strong>Scan My Fridge</strong> button on the home screen. Use your camera or upload a photo. The AI will detect ingredients and suggest recipes.</p>
 
         <h3 className="font-semibold text-sm text-foreground mt-3">How many free scans do I get?</h3>
-        <p className="text-sm text-muted-foreground mt-1">New users receive <strong>1 free scan</strong>. After that, top up with a scan pack whenever you need more.</p>
+        <p className="text-sm text-muted-foreground mt-1">New users receive <strong>3 free scans</strong>. After that, top up with a scan pack whenever you need more.</p>
 
         <h3 className="font-semibold text-sm text-foreground mt-3">How do I get more scans?</h3>
         <p className="text-sm text-muted-foreground mt-1">When your scans run out, a screen appears with two options: <strong>Single Scan Top-up (£0.99, expires in 30 days)</strong> or <strong>Monthly Premium 10 Scans (£4.99, expires in 1 month)</strong>. Use your scans before they expire.</p>

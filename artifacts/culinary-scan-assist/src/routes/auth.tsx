@@ -175,7 +175,7 @@ function AuthPage() {
             style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-soft)" }}
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-            {mode === "signin" ? "Sign in" : redirect === "/scan" ? "Create account & get free scan" : "Create account"}
+            {mode === "signin" ? "Sign in" : redirect === "/scan" ? "Create account & get 3 free scans" : "Create account"}
           </button>
         </form>
       </section>

@@ -180,7 +180,7 @@ function Home() {
               Byte <span className="text-primary">2</span> Eat
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              AI meets your ingredients 🔍
+              AI meets your ingredients
             </p>
           </div>
           <div className="flex items-center gap-2 pt-1">
@@ -353,80 +353,6 @@ function Home() {
         </a>
       )}
 
-      {!dogSisterDismissed && (
-        <a
-          href={WHATS_UP_DOG_APP_STORE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mx-5 mt-4 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-border shadow-sm active:scale-[0.98] transition-transform"
-          onClick={(e) => {
-            if (Capacitor.isNativePlatform()) {
-              e.preventDefault();
-              window.open(WHATS_UP_DOG_APP_STORE_URL, '_system');
-            }
-          }}
-        >
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl overflow-hidden ring-1 ring-border">
-            <img
-              src="https://raw.githubusercontent.com/skeff001-coder/onjjem/main/artifacts/canine-encyclopedia/assets/images/icon.png"
-              alt="What's Up Dog! app icon"
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-foreground">Got a dog too?</p>
-            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
-              Also on the Apple App Store: try {WHATS_UP_DOG_NAME}, our sister app for breed, age & personality scans.
-            </p>
-          </div>
-          <ExternalLink className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); dismissDogSister(); }}
-            aria-label="Dismiss"
-            className="flex-shrink-0 text-muted-foreground hover:text-foreground text-lg leading-none px-1"
-          >
-            ×
-          </button>
-        </a>
-      )}
-
-      {!onjjemSisterDismissed && (
-        <a
-          href={ONJJEM_APP_STORE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mx-5 mt-4 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-border shadow-sm active:scale-[0.98] transition-transform"
-          onClick={(e) => {
-            if (Capacitor.isNativePlatform()) {
-              e.preventDefault();
-              window.open(ONJJEM_APP_STORE_URL, '_system');
-            }
-          }}
-        >
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl overflow-hidden ring-1 ring-border">
-            <img
-              src="https://raw.githubusercontent.com/skeff001-coder/onjjem/main/artifacts/owens-photofix/assets/images/icon.png"
-              alt="ONJJEM app icon"
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-foreground">Turn photos into gifts</p>
-            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
-              Also on the Apple App Store: try {ONJJEM_NAME} for personalised photo gifts — mugs, canvas prints & more.
-            </p>
-          </div>
-          <ExternalLink className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); dismissOnjjemSister(); }}
-            aria-label="Dismiss"
-            className="flex-shrink-0 text-muted-foreground hover:text-foreground text-lg leading-none px-1"
-          >
-            ×
-          </button>
-        </a>
-      )}
-
       {/* Goals */}
       <section className="mt-8 px-5">
         <div className="flex items-center justify-between mb-3">
@@ -543,6 +469,81 @@ function Home() {
           </div>
         )}
       </section>
+
+      {/* Sister apps */}
+      {!dogSisterDismissed && (
+        <a
+          href={WHATS_UP_DOG_APP_STORE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mx-5 mt-4 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-border shadow-sm active:scale-[0.98] transition-transform"
+          onClick={(e) => {
+            if (Capacitor.isNativePlatform()) {
+              e.preventDefault();
+              window.open(WHATS_UP_DOG_APP_STORE_URL, '_system');
+            }
+          }}
+        >
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl overflow-hidden ring-1 ring-border">
+            <img
+              src="https://raw.githubusercontent.com/skeff001-coder/onjjem/main/artifacts/canine-encyclopedia/assets/images/icon.png"
+              alt="What's Up Dog! app icon"
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-foreground">Got a dog too?</p>
+            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+              Also on the Apple App Store: try {WHATS_UP_DOG_NAME}, our sister app for breed, age & personality scans.
+            </p>
+          </div>
+          <ExternalLink className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); dismissDogSister(); }}
+            aria-label="Dismiss"
+            className="flex-shrink-0 text-muted-foreground hover:text-foreground text-lg leading-none px-1"
+          >
+            ×
+          </button>
+        </a>
+      )}
+
+      {!onjjemSisterDismissed && (
+        <a
+          href={ONJJEM_APP_STORE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mx-5 mt-4 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-border shadow-sm active:scale-[0.98] transition-transform"
+          onClick={(e) => {
+            if (Capacitor.isNativePlatform()) {
+              e.preventDefault();
+              window.open(ONJJEM_APP_STORE_URL, '_system');
+            }
+          }}
+        >
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl overflow-hidden ring-1 ring-border">
+            <img
+              src="https://raw.githubusercontent.com/skeff001-coder/onjjem/main/artifacts/owens-photofix/assets/images/icon.png"
+              alt="ONJJEM app icon"
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-foreground">Turn photos into gifts</p>
+            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+              Also on the Apple App Store: try {ONJJEM_NAME} for personalised photo gifts — mugs, canvas prints & more.
+            </p>
+          </div>
+          <ExternalLink className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); dismissOnjjemSister(); }}
+            aria-label="Dismiss"
+            className="flex-shrink-0 text-muted-foreground hover:text-foreground text-lg leading-none px-1"
+          >
+            ×
+          </button>
+        </a>
+      )}
 
       {/* Footer */}
       <footer className="mt-10 px-5 pb-6 flex flex-col items-center gap-2">

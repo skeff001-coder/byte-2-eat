@@ -6,6 +6,7 @@ const STORAGE_KEY        = "bite_scan_credits";
 const STORAGE_EXPIRY_KEY = "bite_scan_expiry";
 const PREMIUM_OWNED_KEY  = "bite_premium_owned";
 const CREDITS_CHANGED    = "bite_credits_changed";
+const FREE_SCANS         = 3;
 
 function addDays(days: number): string {
   const d = new Date();
@@ -24,7 +25,7 @@ function readCredits(): number {
     const val = localStorage.getItem(STORAGE_KEY);
   if (val === null) {
     // No free scan until the user registers — see syncCreditsForUser,
-    // which grants 1 free credit once they sign up with an email.
+    // which grants free credits once they sign up with an email.
     localStorage.setItem(STORAGE_KEY, "0");
     return 0;
   }
@@ -48,15 +49,21 @@ export async function syncCreditsForUser(userId: string): Promise<void> {
     const current = Number(localStorage.getItem(STORAGE_KEY) ?? "-1");
 
     let changed = false;
+    const hasPurchased =
+      localStorage.getItem(STORAGE_EXPIRY_KEY) !== null ||
+      localStorage.getItem(PREMIUM_OWNED_KEY) === "1";
     if (scanCount === 0 && current <= 0) {
-      // Brand-new account with no scans — ensure they get their 1 free scan
-      localStorage.setItem(STORAGE_KEY, "1");
+      // Brand-new account with no scans — ensure they get their free scans
+      localStorage.setItem(STORAGE_KEY, String(FREE_SCANS));
       changed = true;
-    } else if (scanCount > 0 && current === 1) {
-      // Returning user still showing 1 credit — they already used their free scan
-      // on a previous session/device; zero it out to prevent double-dipping
-      localStorage.setItem(STORAGE_KEY, "0");
-      changed = true;
+    } else if (scanCount > 0 && !hasPurchased) {
+      // Returning user on a new device/session — free scans already used
+      // elsewhere count against the allowance, to prevent double-dipping
+      const allowed = Math.max(0, FREE_SCANS - scanCount);
+      if (current > allowed) {
+        localStorage.setItem(STORAGE_KEY, String(allowed));
+        changed = true;
+      }
     }
     if (changed) window.dispatchEvent(new Event(CREDITS_CHANGED));
   } catch {
