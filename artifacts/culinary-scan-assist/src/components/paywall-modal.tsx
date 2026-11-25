@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Loader2, Sparkles, X, ShieldCheck, Zap, Check } from "lucide-react";
 import { useIAP, PRODUCT_SCAN1, PRODUCT_SCAN10, type PurchasedProduct } from "@/lib/use-iap";
 
@@ -16,8 +17,8 @@ const PLANS: {
   perScan?: string;
   badge?: string;
 }[] = [
-  { productId: PRODUCT_SCAN1,  label: "Single Scan Top-up",        price: "£0.99", scans: 1,  expiry: "30 days" },
-  { productId: PRODUCT_SCAN10, label: "Premium 10 Scans",  price: "£4.99", scans: 10, expiry: "30 days", perScan: "Just 50p a scan", badge: "Best Value" },
+  { productId: PRODUCT_SCAN1,  label: "Single Scan Top-up", price: "£0.99", scans: 1,  expiry: "30 days" },
+  { productId: PRODUCT_SCAN10, label: "Premium 10 Scans",   price: "£4.99", scans: 10, expiry: "30 days", perScan: "Just 50p a scan", badge: "Best Value" },
 ];
 
 const VALUE_PROPS = [
@@ -29,11 +30,14 @@ const VALUE_PROPS = [
 
 export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) {
   const { purchase, restore, reset, state, errorMsg, isNative } = useIAP(onUnlock);
+  const [selected, setSelected] = useState<PurchasedProduct>(PRODUCT_SCAN10);
 
   const isPurchasing = state === "purchasing";
   const isRestoring  = state === "restoring";
   const isSuccess    = state === "success";
   const isBusy       = isPurchasing || isRestoring;
+
+  const selectedPlan = PLANS.find((p) => p.productId === selected) ?? PLANS[1];
 
   const handleClose = () => {
     reset();
@@ -93,7 +97,7 @@ export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) 
             </ul>
             <div className="mt-3 rounded-xl bg-accent px-3 py-2 text-center">
               <p className="text-xs font-bold text-accent-foreground">
-                £4.99 for 10 scans works out at 50p each — most people save more than that on food waste in a single week.
+                £4.99 for 10 scans works out at just 50p each — far less than a takeaway.
               </p>
             </div>
           </div>
@@ -105,47 +109,70 @@ export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) 
             <ShieldCheck className="h-5 w-5" /> Scans added — enjoy!
           </div>
         ) : (
-          <div className="px-5 pt-5 pb-2 space-y-3">
-            {PLANS.map((plan) => (
-              <button
-                key={plan.productId}
-                disabled={isBusy || !isNative}
-                onClick={() => purchase(plan.productId)}
-                className="relative flex w-full items-center justify-between rounded-2xl bg-card px-4 py-4 ring-1 ring-border transition-transform active:scale-[0.98] disabled:opacity-60"
-              >
-                {plan.badge && (
-                  <span
-                    className="absolute -top-2 right-4 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-primary-foreground"
-                    style={{ background: "var(--gradient-primary)" }}
+          <>
+            <div className="px-5 pt-5 pb-2 space-y-3">
+              {PLANS.map((plan) => {
+                const isSelected = plan.productId === selected;
+                return (
+                  <button
+                    key={plan.productId}
+                    disabled={isBusy}
+                    onClick={() => setSelected(plan.productId)}
+                    className={`relative flex w-full items-center justify-between rounded-2xl bg-card px-4 py-4 transition-transform active:scale-[0.98] disabled:opacity-60 ${
+                      isSelected ? "ring-2 ring-primary" : "ring-1 ring-border"
+                    }`}
                   >
-                    {plan.badge}
-                  </span>
-                )}
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground"
-                    style={{ background: "var(--gradient-primary)" }}
-                  >
-                    <Zap className="h-4 w-4" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-bold text-foreground">{plan.label}</p>
-                    <p className="text-xs text-muted-foreground">{plan.scans} {plan.scans === 1 ? "scan" : "scans"} · expires in {plan.expiry}</p>
-                    {plan.perScan && (
-                      <p className="text-[11px] font-semibold text-primary mt-0.5">{plan.perScan}</p>
+                    {plan.badge && (
+                      <span
+                        className="absolute -top-2 right-4 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-primary-foreground"
+                        style={{ background: "var(--gradient-primary)" }}
+                      >
+                        {plan.badge}
+                      </span>
                     )}
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isBusy ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  ) : (
-                    <p className="text-base font-extrabold text-foreground">{plan.price}</p>
-                  )}
-                </div>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground"
+                        style={{ background: "var(--gradient-primary)" }}
+                      >
+                        <Zap className="h-4 w-4" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-bold text-foreground">{plan.label}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {plan.scans} {plan.scans === 1 ? "scan" : "scans"} · expires in {plan.expiry}
+                        </p>
+                        {plan.perScan && (
+                          <p className="text-[11px] font-semibold text-primary mt-0.5">{plan.perScan}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-base font-extrabold text-foreground">{plan.price}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Buy button */}
+            <div className="px-5 pt-2 pb-1">
+              <button
+                disabled={isBusy || !isNative}
+                onClick={() => purchase(selected)}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-extrabold text-primary-foreground transition-transform active:scale-[0.98] disabled:opacity-60"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                {isPurchasing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    Buy {selectedPlan.scans} {selectedPlan.scans === 1 ? "scan" : "scans"} · {selectedPlan.price}
+                  </>
+                )}
               </button>
-            ))}
-          </div>
+            </div>
+          </>
         )}
 
         {/* Error */}
@@ -161,7 +188,7 @@ export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) 
               disabled={isBusy}
               className="text-xs font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
             >
-              Restore purchases
+              {isRestoring ? "Restoring…" : "Restore purchases"}
             </button>
           )}
           <p className="text-center text-[10px] text-muted-foreground leading-relaxed mt-1">
