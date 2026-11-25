@@ -416,7 +416,7 @@ function ScanPage() {
             </div>
           )}
 
-          {result.healthScore != null && (
+          {!((result.ingredients?.length ?? 0) === 0) && result.healthScore != null && (
             <>
               <HealthScore score={result.healthScore} tip={result.healthTip ?? null} />
               <div className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 ring-1 ring-amber-200">
@@ -455,6 +455,7 @@ function ScanPage() {
             </>
           )}
 
+          {!((result.ingredients?.length ?? 0) === 0) && (<>
           <div className="mt-5 flex gap-1 rounded-2xl bg-card p-1 ring-1 ring-border">
             {TABS.map(({ id, label, icon: Icon }) => (
               <button key={id} onClick={() => setActiveTab(id)}
@@ -511,6 +512,7 @@ function ScanPage() {
             {activeTab === "mealplan" && <MealPlanView mealPlan={result.mealPlan} />}
             {activeTab === "shopping" && <ShoppingListView items={result.shoppingList} />}
           </div>
+          </>)}
 
           {credits === 1 && hasPaid && (
             <button
