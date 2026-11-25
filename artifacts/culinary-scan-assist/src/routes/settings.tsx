@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth, signOut } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useScanCredits } from "@/lib/use-scan-credits";
-import { APP_VERSION, BUNDLE_ID, SUPPORT_EMAIL, EFFORTLESS_BURN_NAME, EFFORTLESS_BURN_APP_STORE_URL } from "@/lib/app-info";
+import { APP_VERSION, BUNDLE_ID, SUPPORT_EMAIL, EFFORTLESS_BURN_NAME, EFFORTLESS_BURN_APP_STORE_URL, EFFORTLESS_BURN_LIVE } from "@/lib/app-info";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -233,6 +233,7 @@ function SettingsPage() {
         </div>
 
         {/* Sister app */}
+        {EFFORTLESS_BURN_LIVE && (
         <a
           href={EFFORTLESS_BURN_APP_STORE_URL}
           target="_blank"
@@ -248,6 +249,7 @@ function SettingsPage() {
           </div>
           <ExternalLink className="h-4 w-4 text-rose-400" />
         </a>
+        )}
 
         {/* App Info */}
         <div className="rounded-3xl bg-card ring-1 ring-border overflow-hidden">

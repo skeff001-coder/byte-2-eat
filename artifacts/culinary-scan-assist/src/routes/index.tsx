@@ -9,7 +9,7 @@ import { useAuth, signOut } from "@/lib/use-auth";
 import { useScanCredits } from "@/lib/use-scan-credits";
 import { fetchPromo, openExternal, type Promo } from "@/lib/cross-promo";
 import { PRODUCT_SCAN1, PRODUCT_SCAN10, type PurchasedProduct } from "@/lib/use-iap";
-import { EFFORTLESS_BURN_NAME, EFFORTLESS_BURN_APP_STORE_URL, WHATS_UP_DOG_NAME, WHATS_UP_DOG_APP_STORE_URL, ONJJEM_NAME, ONJJEM_APP_STORE_URL } from "@/lib/app-info";
+import { EFFORTLESS_BURN_LIVE, EFFORTLESS_BURN_NAME, EFFORTLESS_BURN_APP_STORE_URL, WHATS_UP_DOG_NAME, WHATS_UP_DOG_APP_STORE_URL, ONJJEM_NAME, ONJJEM_APP_STORE_URL } from "@/lib/app-info";
 import { useGoalMode, GOAL_MODES } from "@/lib/use-goal-mode";
 import { useSavingsTracker } from "@/lib/use-savings-tracker";
 import { PaywallModal } from "@/components/paywall-modal";
@@ -284,7 +284,7 @@ function Home() {
         </div>
       </section>
 
-            {false && (
+            {EFFORTLESS_BURN_LIVE && (
 
         <a
           href={EFFORTLESS_BURN_APP_STORE_URL}

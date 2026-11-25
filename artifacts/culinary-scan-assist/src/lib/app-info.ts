@@ -5,7 +5,9 @@ export const PRIVACY_EMAIL = "privacy@byte2eat.app";
 
 // Sister app — Effortless Burn (calorie & exercise companion)
 export const EFFORTLESS_BURN_NAME = "Effortless Burn";
-export const EFFORTLESS_BURN_APP_STORE_URL = "https://apps.apple.com/app/effortless-burn"; // Update with real App Store link when available
+// Set EFFORTLESS_BURN_LIVE = true and paste the real App Store URL once the app is back on the store.
+export const EFFORTLESS_BURN_LIVE = false;
+export const EFFORTLESS_BURN_APP_STORE_URL = "https://apps.apple.com/app/effortless-burn";
 
 // Sister app — What's Up Dog! (dog breed scanner)
 export const WHATS_UP_DOG_NAME = "What's Up Dog!";
