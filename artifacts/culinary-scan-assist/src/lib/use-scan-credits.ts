@@ -1,36 +1,40 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { cancelExpiryNotification, scheduleExpiryNotification } from "./scan-expiry-notification";
+import { cancelExpiryNotification } from "./scan-expiry-notification";
 
 const STORAGE_KEY        = "bite_scan_credits";
-const STORAGE_EXPIRY_KEY = "bite_scan_expiry";
+const LEGACY_EXPIRY_KEY  = "bite_scan_expiry"; // scans no longer expire; only read to migrate old installs
+const PAID_KEY           = "bite_scan_paid";
 const PREMIUM_OWNED_KEY  = "bite_premium_owned";
 const CREDITS_CHANGED    = "bite_credits_changed";
-const FREE_SCANS         = 3;
+export const FREE_SCANS  = 3;
 
-function addDays(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString();
+// Older versions stored an expiry date on purchased scans. Scans never expire
+// now, so drop the date, remember that the user has paid, and cancel any
+// "your scans are about to expire" notifications that were already scheduled.
+function migrateLegacyExpiry() {
+  if (localStorage.getItem(LEGACY_EXPIRY_KEY) !== null) {
+    localStorage.removeItem(LEGACY_EXPIRY_KEY);
+    localStorage.setItem(PAID_KEY, "1");
+    void cancelExpiryNotification();
+  }
+}
+
+function readHasPaid(): boolean {
+  migrateLegacyExpiry();
+  return localStorage.getItem(PAID_KEY) === "1" || localStorage.getItem(PREMIUM_OWNED_KEY) === "1";
 }
 
 function readCredits(): number {
-  const expiry = localStorage.getItem(STORAGE_EXPIRY_KEY);
-  if (expiry && new Date(expiry) < new Date()) {
-    localStorage.setItem(STORAGE_KEY, "0");
-    localStorage.removeItem(STORAGE_EXPIRY_KEY);
-    void cancelExpiryNotification();
-    return 0;
-  }
-    const val = localStorage.getItem(STORAGE_KEY);
+  migrateLegacyExpiry();
+  const val = localStorage.getItem(STORAGE_KEY);
   if (val === null) {
-    // No free scan until the user registers — see syncCreditsForUser,
-    // which grants free credits once they sign up with an email.
+    // No free scans until the user registers — see syncCreditsForUser,
+    // which grants the free scans once they sign up with an email.
     localStorage.setItem(STORAGE_KEY, "0");
     return 0;
   }
   return Number(val);
-
 }
 
 function writeCredits(n: number) {
@@ -49,9 +53,7 @@ export async function syncCreditsForUser(userId: string): Promise<void> {
     const current = Number(localStorage.getItem(STORAGE_KEY) ?? "-1");
 
     let changed = false;
-    const hasPurchased =
-      localStorage.getItem(STORAGE_EXPIRY_KEY) !== null ||
-      localStorage.getItem(PREMIUM_OWNED_KEY) === "1";
+    const hasPurchased = readHasPaid();
     if (scanCount === 0 && current <= 0) {
       // Brand-new account with no scans — ensure they get their free scans
       localStorage.setItem(STORAGE_KEY, String(FREE_SCANS));
@@ -71,36 +73,26 @@ export async function syncCreditsForUser(userId: string): Promise<void> {
   }
 }
 
+// Used by rewards (e.g. savings milestones) to add free scans.
+export function grantFreeScans(n: number) {
+  if (n <= 0) return;
+  writeCredits(readCredits() + n);
+  window.dispatchEvent(new Event(CREDITS_CHANGED));
+}
+
 export const PLAN_CREDITS: Record<ScanPlan, number> = {
   scan1:  1,
   scan10: 10,
 };
 
-const PLAN_EXPIRY_DAYS: Record<ScanPlan, number> = {
-  scan1:  30,
-  scan10: 30,
-};
-
-export function getDaysUntilExpiry(): number | null {
-  const expiry = localStorage.getItem(STORAGE_EXPIRY_KEY);
-  if (!expiry) return null;
-  const msLeft = new Date(expiry).getTime() - Date.now();
-  if (msLeft <= 0) return null;
-  return Math.ceil(msLeft / (1000 * 60 * 60 * 24));
-}
-
-function readHasExpiry(): boolean {
-  return localStorage.getItem(STORAGE_EXPIRY_KEY) !== null;
-}
-
 export function useScanCredits() {
   const [credits, setCredits] = useState<number>(() => readCredits());
-  const [hasExpiry, setHasExpiry] = useState<boolean>(() => readHasExpiry());
+  const [hasPaid, setHasPaid] = useState<boolean>(() => readHasPaid());
 
   useEffect(() => {
     const refresh = () => {
       setCredits(readCredits());
-      setHasExpiry(readHasExpiry());
+      setHasPaid(readHasPaid());
     };
     window.addEventListener(CREDITS_CHANGED, refresh);
     return () => window.removeEventListener(CREDITS_CHANGED, refresh);
@@ -114,35 +106,23 @@ export function useScanCredits() {
     const next = Math.max(0, c - 1);
     writeCredits(next);
     setCredits(next);
-    if (next === 0) {
-      void cancelExpiryNotification();
-    }
   }, []);
 
   const purchasePlan = useCallback((plan: ScanPlan) => {
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith("bite_low_scan_dismissed_")) keysToRemove.push(key);
-    }
-    keysToRemove.forEach((k) => localStorage.removeItem(k));
-
-    const toAdd = PLAN_CREDITS[plan];
-    const c = readCredits();
-    const next = c + toAdd;
+    localStorage.removeItem("bite_low_scan_dismissed");
+    const next = readCredits() + PLAN_CREDITS[plan];
     writeCredits(next);
-    const expiryDays = PLAN_EXPIRY_DAYS[plan];
-    const expiryIso = addDays(expiryDays);
-    localStorage.setItem(STORAGE_EXPIRY_KEY, expiryIso);
+    localStorage.setItem(PAID_KEY, "1");
     setCredits(next);
-    scheduleExpiryNotification(expiryIso);
+    setHasPaid(true);
   }, []);
 
+  // The 10-pack is a consumable, so every purchase must add 10 scans. (Previously
+  // a second purchase was ignored, charging the user without giving them scans.)
   const unlockPremiumCredits = useCallback(() => {
-    if (localStorage.getItem(PREMIUM_OWNED_KEY) === "1") return;
     localStorage.setItem(PREMIUM_OWNED_KEY, "1");
     purchasePlan("scan10");
   }, [purchasePlan]);
 
-  return { credits, canScan, hasExpiry, consumeCredit, purchasePlan, unlockPremiumCredits };
+  return { credits, canScan, hasPaid, consumeCredit, purchasePlan, unlockPremiumCredits };
 }

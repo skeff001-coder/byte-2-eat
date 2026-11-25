@@ -14,6 +14,10 @@ import { useSavingsTracker } from "@/lib/use-savings-tracker";
 import { PaywallModal } from "@/components/paywall-modal";
 import { MealPlanView } from "@/components/meal-plan-view";
 import { ShoppingListView } from "@/components/shopping-list-view";
+import { RecipeActions } from "@/components/recipe-actions";
+import { dogHazards, openExternal, recipeToMugText } from "@/lib/cross-promo";
+import { WHATS_UP_DOG_APP_STORE_URL, WHATS_UP_DOG_NAME } from "@/lib/app-info";
+import { SAVINGS_PER_FREE_SCAN } from "@/lib/use-savings-tracker";
 
 export const Route = createFileRoute("/scan")({
   component: ScanPage,
@@ -65,9 +69,10 @@ function ScanPage() {
   const router = useRouter();
   const { isFavorite, toggle, isAuthed } = useFavorites();
   const { user, loading: authLoading } = useAuth();
-  const { credits, canScan, hasExpiry, consumeCredit, purchasePlan, unlockPremiumCredits } = useScanCredits();
+  const { credits, canScan, hasPaid, consumeCredit, purchasePlan, unlockPremiumCredits } = useScanCredits();
   const { goalMode } = useGoalMode();
   const { addSavings } = useSavingsTracker();
+  const [rewardScans, setRewardScans] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallVariant, setPaywallVariant] = useState<"default" | "post-trial">("default");
   const [activeTab, setActiveTab] = useState<ResultTab>("recipes");
@@ -130,7 +135,7 @@ function ScanPage() {
     if (!imageDataUrl) return;
     if (!canScan) { setPaywallVariant("default"); setShowPaywall(true); return; }
     // Was this the very last credit, and was it the free trial credit (no expiry = not a purchased pack)?
-    const willUseLastFreeTrialScan = credits === 1 && !hasExpiry;
+    const willUseLastFreeTrialScan = credits === 1 && !hasPaid;
     setStage("loading");
     // Credit is NOT consumed here — only consumed after a successful scan.
     // This ensures users never lose a credit due to a network or server error.
@@ -157,7 +162,12 @@ function ScanPage() {
       setResult(res);
       setIngredients(res.ingredients ?? []);
       setExpiringIngredients(res.expiringIngredients ?? []);
-      if (res.estimatedSavings > 0) addSavings(res.estimatedSavings);
+      if (res.estimatedSavings > 0) {
+        const earned = addSavings(res.estimatedSavings);
+        setRewardScans(earned);
+      } else {
+        setRewardScans(0);
+      }
       if (user && (res.ingredients?.length ?? 0) > 0) {
         supabase.from("scans").insert({
           user_id: user.id, ingredients: res.ingredients,
@@ -351,6 +361,21 @@ function ScanPage() {
             })}
           </div>
 
+          {dogHazards(ingredients).length > 0 && (
+            <div className="mt-3 rounded-2xl bg-sky-50 px-4 py-3 ring-1 ring-sky-200">
+              <p className="text-xs font-bold text-sky-900">🐶 Careful if you have a dog</p>
+              <p className="mt-1 text-[11px] leading-snug text-sky-800">
+                {dogHazards(ingredients).join(", ")} can be harmful to dogs. Keep them out of your dog's bowl, and if your dog has eaten any, call your vet.
+              </p>
+              <button
+                onClick={() => openExternal(WHATS_UP_DOG_APP_STORE_URL)}
+                className="mt-2 text-[11px] font-semibold text-sky-900 underline underline-offset-2"
+              >
+                Check your dog's breed profile in {WHATS_UP_DOG_NAME} →
+              </button>
+            </div>
+          )}
+
           <div className="mt-4 flex gap-2">
             <input type="text" value={newIngredient} onChange={(e) => setNewIngredient(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addIngredient()} placeholder="Add ingredient…"
@@ -380,6 +405,14 @@ function ScanPage() {
                 <p className="text-lg font-extrabold text-emerald-700">~£{result.estimatedSavings}</p>
               </div>
               <p className="ml-auto text-[10px] text-emerald-600 text-right leading-tight">using food already in your fridge</p>
+            </div>
+          )}
+
+          {rewardScans > 0 && (
+            <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-center ring-1 ring-emerald-200">
+              <p className="text-sm font-bold text-emerald-800">
+                🎉 You've saved another £{SAVINGS_PER_FREE_SCAN} — {rewardScans} free scan{rewardScans > 1 ? "s" : ""} added!
+              </p>
             </div>
           )}
 
@@ -466,6 +499,10 @@ function ScanPage() {
                         ))}
                       </ol>
                     )}
+                    <RecipeActions
+                      title={recipe.title}
+                      body={recipeToMugText({ description: recipe.description, steps: recipe.steps })}
+                    />
                   </li>
                 ))}
               </ul>
@@ -475,7 +512,7 @@ function ScanPage() {
             {activeTab === "shopping" && <ShoppingListView items={result.shoppingList} />}
           </div>
 
-          {credits === 1 && hasExpiry && (
+          {credits === 1 && hasPaid && (
             <button
               onClick={() => { setPaywallVariant("default"); setShowPaywall(true); }}
               className="mt-6 flex w-full items-center gap-3 rounded-2xl bg-primary/10 px-4 py-3.5 ring-1 ring-primary/30 text-left transition-transform active:scale-[0.98]"

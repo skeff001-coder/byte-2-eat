@@ -161,11 +161,9 @@ function TermsOfService() {
       <Section title="3. Scan Packs — In-App Purchases">
         <p>Byte 2 Eat offers the following scan packs, purchased through Apple's App Store:</p>
         <p>• <strong>Single Scan Top-up</strong> — £0.99 for 1 scan</p>
-        <p>• <strong>Monthly Premium (10 Scans)</strong> — £4.99 for 10 scans</p>
-        <p>All purchases are consumable — scans are added to your account and must be used within the following periods from the date of purchase:</p>
-        <p>• <strong>Single Scan Top-up</strong> — expires 30 days after purchase</p>
-        <p>• <strong>Monthly Premium 10 Scans</strong> — expires 1 month after purchase</p>
-        <p>Unused scans are forfeited on expiry. You can top up at any time before your balance runs out.</p>
+        <p>• <strong>Premium 10 Scans</strong> — £4.99 for 10 scans</p>
+        <p>All purchases are consumable — scans are added to your account when you buy them. Scans do not expire. You can top up at any time.</p>
+        <p>You can also earn free scans: each time your tracked savings pass another £100, one free scan is added.</p>
         <p>Payment is charged to your Apple ID at the time of purchase and is processed entirely by Apple. We do not store payment card details.</p>
         <p>Purchases can be restored using the "Restore Purchases" button in the app. Refunds are subject to Apple's standard refund policy — contact Apple Support to request a refund.</p>
       </Section>

@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Clock, Heart, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Clock, Coffee, Heart, Sparkles } from "lucide-react";
+import { RecipeMugModal } from "@/components/recipe-mug-modal";
+import { recipeToMugText } from "@/lib/cross-promo";
 import { useFavorites } from "@/lib/favorites";
 import { useAuth } from "@/lib/use-auth";
 
@@ -10,6 +13,7 @@ export const Route = createFileRoute("/favorites")({
 function FavoritesPage() {
   const { favorites, remove } = useFavorites();
   const { user, loading } = useAuth();
+  const [mug, setMug] = useState<{ title: string; body: string } | null>(null);
 
   return (
     <main className="min-h-screen bg-background pb-12">
@@ -27,6 +31,13 @@ function FavoritesPage() {
       </header>
 
       <section className="px-5">
+        <button
+          onClick={() => setMug({ title: "", body: "" })}
+          className="mb-3 flex w-full items-center gap-3 rounded-2xl bg-accent px-4 py-3 text-left ring-1 ring-primary/20 active:scale-[0.98] transition-transform"
+        >
+          <Coffee className="h-5 w-5 flex-shrink-0 text-primary" />
+          <span className="text-sm font-semibold text-foreground">Put your own recipe on a mug</span>
+        </button>
         {!loading && !user ? (
           <div className="mt-10 rounded-3xl bg-card p-8 text-center ring-1 ring-border">
             <Sparkles className="mx-auto h-8 w-8 text-primary" />
@@ -92,6 +103,13 @@ function FavoritesPage() {
                   )}
                 </div>
                 <button
+                  onClick={() => setMug({ title: r.title, body: recipeToMugText({ description: r.description, steps: r.steps }) })}
+                  aria-label={`Put ${r.title} on a mug`}
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent text-primary"
+                >
+                  <Coffee className="h-5 w-5" />
+                </button>
+                <button
                   onClick={() => remove(r.key)}
                   aria-label={`Remove ${r.title} from favourites`}
                   className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
@@ -103,6 +121,7 @@ function FavoritesPage() {
           </ul>
         )}
       </section>
+      {mug && <RecipeMugModal initialTitle={mug.title} initialBody={mug.body} onClose={() => setMug(null)} />}
     </main>
   );
 }

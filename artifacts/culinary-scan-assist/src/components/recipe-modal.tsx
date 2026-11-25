@@ -1,5 +1,7 @@
 import { Clock, Users, Flame, X, CheckCircle2 } from "lucide-react";
 import type { Recipe } from "@/lib/recipes";
+import { RecipeActions } from "@/components/recipe-actions";
+import { recipeToMugText } from "@/lib/cross-promo";
 
 interface RecipeModalProps {
   recipe: Recipe;
@@ -82,6 +84,11 @@ export function RecipeModal({ recipe, onClose }: RecipeModalProps) {
               ))}
             </ol>
           </div>
+
+          <RecipeActions
+            title={recipe.title}
+            body={recipeToMugText({ ingredients: recipe.ingredients, steps: recipe.steps })}
+          />
         </div>
       </div>
     </div>

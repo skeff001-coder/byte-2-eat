@@ -4,6 +4,7 @@ import analyzeFridgeRouter from "./analyze-fridge";
 import deleteAccountRouter from "./delete-account";
 import supportRouter from "./support";
 import searchRecipesRouter from "./search-recipes";
+import promoRouter from "./promo";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(analyzeFridgeRouter);
 router.use(deleteAccountRouter);
 router.use(supportRouter);
 router.use(searchRecipesRouter);
+router.use(promoRouter);
 
 export default router;

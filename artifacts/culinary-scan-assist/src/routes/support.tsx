@@ -26,7 +26,7 @@ function SupportPage() {
         <p className="text-sm text-muted-foreground mt-1">New users receive <strong>3 free scans</strong>. After that, top up with a scan pack whenever you need more.</p>
 
         <h3 className="font-semibold text-sm text-foreground mt-3">How do I get more scans?</h3>
-        <p className="text-sm text-muted-foreground mt-1">When your scans run out, a screen appears with two options: <strong>Single Scan Top-up (£0.99, expires in 30 days)</strong> or <strong>Monthly Premium 10 Scans (£4.99, expires in 1 month)</strong>. Use your scans before they expire.</p>
+        <p className="text-sm text-muted-foreground mt-1">When your scans run out, a screen appears with two options: <strong>Single Scan Top-up (£0.99)</strong> or <strong>Premium 10 Scans (£4.99)</strong>. Scans never expire. You also earn a free scan every time your tracked savings pass another £100.</p>
 
         <h3 className="font-semibold text-sm text-foreground mt-3">How do I restore my purchase?</h3>
         <p className="text-sm text-muted-foreground mt-1">Go to <strong>Settings → Restore Purchases</strong> inside the app.</p>

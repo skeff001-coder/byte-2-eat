@@ -13,19 +13,18 @@ const PLANS: {
   label: string;
   price: string;
   scans: number;
-  expiry: string;
   perScan?: string;
   badge?: string;
 }[] = [
-  { productId: PRODUCT_SCAN1,  label: "Single Scan Top-up", price: "£0.99", scans: 1,  expiry: "30 days" },
-  { productId: PRODUCT_SCAN10, label: "Premium 10 Scans",   price: "£4.99", scans: 10, expiry: "30 days", perScan: "Just 50p a scan", badge: "Best Value" },
+  { productId: PRODUCT_SCAN1,  label: "Single Scan Top-up", price: "£0.99", scans: 1 },
+  { productId: PRODUCT_SCAN10, label: "Premium 10 Scans",   price: "£4.99", scans: 10, perScan: "Just 50p a scan", badge: "Best Value" },
 ];
 
 const VALUE_PROPS = [
   "10 AI fridge scans — a full month of meal ideas",
   "Full meal plans & shopping lists included",
   "Money-saved tracking so you can see the difference",
-  "No subscription — pay once, use anytime in 30 days",
+  "No subscription — pay once, use whenever you like. Scans never expire",
 ];
 
 export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) {
@@ -77,7 +76,7 @@ export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) 
             <>
               <h2 className="text-xl font-extrabold tracking-tight">Get More Scans</h2>
               <p className="mt-1 text-sm opacity-90">
-                Choose a scan pack — use them before they expire.
+                Choose a scan pack — they never expire.
               </p>
             </>
           )}
@@ -140,7 +139,7 @@ export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) 
                       <div className="text-left">
                         <p className="text-sm font-bold text-foreground">{plan.label}</p>
                         <p className="text-xs text-muted-foreground">
-                          {plan.scans} {plan.scans === 1 ? "scan" : "scans"} · expires in {plan.expiry}
+                          {plan.scans} {plan.scans === 1 ? "scan" : "scans"} · never expires
                         </p>
                         {plan.perScan && (
                           <p className="text-[11px] font-semibold text-primary mt-0.5">{plan.perScan}</p>
@@ -192,7 +191,7 @@ export function PaywallModal({ onClose, onUnlock, variant = "default" }: Props) 
             </button>
           )}
           <p className="text-center text-[10px] text-muted-foreground leading-relaxed mt-1">
-            Charged to your Apple ID at confirmation of purchase. Scan packs are one-time purchases — no subscription. Single scan expires in 30 days; 10-scan pack expires in 1 month. Manage in your Apple ID Account Settings.
+            Charged to your Apple ID at confirmation of purchase. Scan packs are one-time purchases — no subscription. Manage in your Apple ID Account Settings.
           </p>
         </div>
 

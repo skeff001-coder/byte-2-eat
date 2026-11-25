@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Camera, Clock, Flame, Heart, Search, PiggyBank, Settings, ShoppingBag, TriangleAlert, ExternalLink, Sparkles, Loader2, SlidersHorizontal } from "lucide-react";
+import { Camera, Clock, Flame, Heart, Search, PiggyBank, Settings, ShoppingBag, ExternalLink, Sparkles, Loader2, SlidersHorizontal } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { getTrendingRecipes, type Recipe } from "@/lib/recipes";
 import { searchRecipesAI } from "@/lib/search-recipes";
 import { useFavorites } from "@/lib/favorites";
 import { useAuth, signOut } from "@/lib/use-auth";
-import { useScanCredits, getDaysUntilExpiry } from "@/lib/use-scan-credits";
+import { useScanCredits } from "@/lib/use-scan-credits";
+import { fetchPromo, openExternal, type Promo } from "@/lib/cross-promo";
 import { PRODUCT_SCAN1, PRODUCT_SCAN10, type PurchasedProduct } from "@/lib/use-iap";
 import { EFFORTLESS_BURN_NAME, EFFORTLESS_BURN_APP_STORE_URL, WHATS_UP_DOG_NAME, WHATS_UP_DOG_APP_STORE_URL, ONJJEM_NAME, ONJJEM_APP_STORE_URL } from "@/lib/app-info";
 import { useGoalMode, GOAL_MODES } from "@/lib/use-goal-mode";
@@ -30,7 +31,7 @@ function Home() {
   const navigate = useNavigate();
   const { isFavorite, toggle, isAuthed } = useFavorites();
   const { user } = useAuth();
-  const { credits, canScan, purchasePlan, unlockPremiumCredits } = useScanCredits();
+  const { credits, canScan, hasPaid, purchasePlan, unlockPremiumCredits } = useScanCredits();
   const { goalMode, setGoalMode } = useGoalMode();
   const { monthly } = useSavingsTracker();
   const [sisterDismissed, setSisterDismissed] = useState(() =>
@@ -55,52 +56,36 @@ function Home() {
     setOnjjemSisterDismissed(true);
   };
 
-  const [expiryDays, setExpiryDays] = useState<number | null>(() => getDaysUntilExpiry());
-  const [expiryBannerDismissed, setExpiryBannerDismissed] = useState<boolean>(() => {
-    const expiry = localStorage.getItem("bite_scan_expiry");
-    if (!expiry) return false;
-    return localStorage.getItem(`bite_expiry_dismissed_${expiry}`) === "1";
-  });
-  const [lowScanDismissed, setLowScanDismissed] = useState<boolean>(() => {
-    const expiry = localStorage.getItem("bite_scan_expiry");
-    if (!expiry) return false;
-    return localStorage.getItem(`bite_low_scan_dismissed_${expiry}`) === "1";
-  });
+  const [lowScanDismissed, setLowScanDismissed] = useState<boolean>(
+    () => localStorage.getItem("bite_low_scan_dismissed") === "1",
+  );
 
   useEffect(() => {
-    setExpiryDays(getDaysUntilExpiry());
-    const expiry = localStorage.getItem("bite_scan_expiry");
-    const dismissed = expiry
-      ? localStorage.getItem(`bite_low_scan_dismissed_${expiry}`) === "1"
-      : false;
-    setLowScanDismissed(dismissed);
+    if (credits !== 1) {
+      localStorage.removeItem("bite_low_scan_dismissed");
+      setLowScanDismissed(false);
+    }
   }, [credits]);
 
-  const showExpiryBanner =
-    !expiryBannerDismissed &&
-    credits > 0 &&
-    expiryDays !== null &&
-    expiryDays <= 7;
-
-  const dismissExpiryBanner = () => {
-    const expiry = localStorage.getItem("bite_scan_expiry");
-    if (expiry) {
-      localStorage.setItem(`bite_expiry_dismissed_${expiry}`, "1");
-    }
-    setExpiryBannerDismissed(true);
-  };
-
-  const isPaidCredit = localStorage.getItem("bite_scan_expiry") !== null;
-  const showLowScanBanner = !lowScanDismissed && credits === 1 && isPaidCredit;
+  const showLowScanBanner = !lowScanDismissed && credits === 1 && hasPaid;
 
   const dismissLowScanBanner = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const expiry = localStorage.getItem("bite_scan_expiry");
-    if (expiry) {
-      localStorage.setItem(`bite_low_scan_dismissed_${expiry}`, "1");
-    }
+    localStorage.setItem("bite_low_scan_dismissed", "1");
     setLowScanDismissed(true);
   };
+
+  // Promo card — text and link come from the server so they can change without an app update.
+  const [promo, setPromo] = useState<Promo | null>(null);
+  const [promoDismissed, setPromoDismissed] = useState<string | null>(() =>
+    localStorage.getItem("bite_promo_dismissed"),
+  );
+  useEffect(() => {
+    let cancelled = false;
+    fetchPromo().then((p) => { if (!cancelled) setPromo(p); });
+    return () => { cancelled = true; };
+  }, []);
+  const showPromo = !!promo && promoDismissed !== promo.id;
 
   const q = query.trim().toLowerCase();
   const localFiltered = q
@@ -255,26 +240,6 @@ function Home() {
           >
             ×
           </button>
-        </button>
-      )}
-
-      {showExpiryBanner && (
-        <button
-          onClick={dismissExpiryBanner}
-          className="mx-5 mt-1 mb-1 flex w-[calc(100%-2.5rem)] items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left ring-1 ring-border shadow-sm active:scale-[0.98] transition-transform"
-          aria-label="Dismiss scan credit expiry warning"
-        >
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50">
-            <TriangleAlert className="h-5 w-5 text-amber-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-foreground">
-              {expiryDays === 1 ? "Your scans expire tomorrow!" : `Your scans expire in ${expiryDays} days`}
-            </p>
-            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
-              Use your remaining {credits === 1 ? "scan" : `${credits} scans`} before they're gone. Tap to dismiss.
-            </p>
-          </div>
         </button>
       )}
 
@@ -508,7 +473,41 @@ function Home() {
         </a>
       )}
 
-      {!onjjemSisterDismissed && (
+      {showPromo && promo && (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => openExternal(promo.url)}
+          onKeyDown={(e) => e.key === "Enter" && openExternal(promo.url)}
+          className="mx-5 mt-4 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-border shadow-sm active:scale-[0.98] transition-transform cursor-pointer"
+        >
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl overflow-hidden ring-1 ring-border">
+            <img
+              src="https://raw.githubusercontent.com/skeff001-coder/onjjem/main/artifacts/owens-photofix/assets/images/icon.png"
+              alt="ONJJEM app icon"
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-foreground">{promo.title}</p>
+            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{promo.body}</p>
+            <p className="text-[11px] font-semibold text-primary mt-1">{promo.cta ?? "Shop now"} →</p>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              localStorage.setItem("bite_promo_dismissed", promo.id);
+              setPromoDismissed(promo.id);
+            }}
+            aria-label="Dismiss"
+            className="flex-shrink-0 text-muted-foreground hover:text-foreground text-lg leading-none px-1"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {!onjjemSisterDismissed && !showPromo && (
         <a
           href={ONJJEM_APP_STORE_URL}
           target="_blank"
