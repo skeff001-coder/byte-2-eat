@@ -81,6 +81,7 @@ Return ONLY valid minified JSON with this exact shape (no markdown fences):
 {"ingredients":[],"expiringIngredients":[],"healthScore":0,"healthTip":"","recipes":[{"title":"","time":"","description":"","steps":[]}],"mealPlan":[{"day":"","breakfast":{"title":"","time":""},"lunch":{"title":"","time":""},"dinner":{"title":"","time":""}}],"shoppingList":[{"item":"","cost":0.00,"aisle":""}],"estimatedSavings":0}
 
 Rules:
+- If the photo contains NO food or drink at all (e.g. a keyboard, a person, a blurry or dark image), return empty arrays for ingredients, expiringIngredients, recipes, mealPlan and shoppingList, healthScore 0 and estimatedSavings 0. Never invent ingredients that are not visible.
 - ingredients: all visible food items
 - expiringIngredients: items that appear near expiry (wilting veg, nearly empty, close-dated) — empty array if none obvious. Include natural-language expiry hints like "your spinach expires tomorrow" or "use your chicken tonight"
 - healthScore: integer 1-100 nutritional quality of visible ingredients

@@ -142,6 +142,16 @@ function ScanPage() {
         setStage("result");
         return;
       }
+      // Nothing food-related spotted (e.g. a keyboard or blurry photo) — do NOT consume the credit
+      if ((res.ingredients?.length ?? 0) === 0) {
+        setResult({
+          ...res,
+          error: "No ingredients spotted — try scanning your fridge, cupboard, or a receipt! Your scan credit has NOT been used.",
+          recipes: [], mealPlan: [], shoppingList: [], expiringIngredients: [], estimatedSavings: 0,
+        });
+        setStage("result");
+        return;
+      }
       // Success — now consume the credit
       consumeCredit();
       setResult(res);
